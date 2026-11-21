@@ -47,6 +47,11 @@ jobs:
             -p 8081:8081 \
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
 
+      - name: Debug Container
+        run: |
+         docker ps -a
+         docker logs spring-boot-app
+
       - name: Verify
         run: |
            for i in {1..12}; do

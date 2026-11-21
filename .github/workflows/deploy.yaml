@@ -1,0 +1,85 @@
+name: Spring boot build and deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  IMAGE_NAME: spring-boot-app
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setting up java
+        uses: actions/setup-java@v4
+        with:
+          distributuion: temurin
+          java-version: 17
+          cache: maven
+
+      - name: Build jar
+        run: mvn clean package -DskipTests
+
+      - name: Building Docker image
+        run: docker build -t ${{ secrets:DOCKER_USERNAME}}/${{env.IMAGE_NAME}}:latest .
+
+      - name: Login to Docker
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push image to Dockerhub
+        run: Docker push ${{ secrets:DOCKERHUB_USERNAME}}/${{env.IMAGE_NAME}}:latest
+
+      - name: Run Docker Container
+        run: |
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+          docker run -d \
+            --name spring-boot-app \
+            -p 8081:8081 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Verify Welcome API
+        run: |
+          for i in {1..12}; do
+            RESPONSE=$(curl -s http://localhost:8081/api/welcome)
+
+            if [ ! -z "$RESPONSE" ]; then
+              echo "✅ Application Started Successfully"
+              echo "✅ Response: $RESPONSE"
+              exit 0
+            fi
+
+            echo "⏳ Waiting for application..."
+            sleep 5
+          done
+
+          echo "❌ Application failed to start"
+          docker logs spring-boot-app
+          exit 1
+
+      - name: Show Container Logs
+        if: always()
+        run: |
+          docker logs spring-boot-app
+
+#      - name: Deploy to Ec2
+#        uses: appleboy/ssh-action@v1.2.0
+#        with:
+#          host: ${{secrets.EC2_HOST}}
+#          username: ${{ secrets.EC2_USER}}
+#          key: ${{secrets:EC2_SSH_kEY}}
+#          script: |
+#            docker pull ${{ secrets:DOCKER_USERNAME}}/${{env.IMAGE_NAME}}:latest
+#            docker stop spring-boot-app || true
+#            docker rm spring-boot-app || true
+#            docker run -d --name spring-boot-app --restart unless-stopped -p 8081:8081 ${{ secrets:DOCKER_USERNAME}}/${{env.IMAGE_NAME}}:latest
+#            docker image prune -f

@@ -47,29 +47,25 @@ jobs:
             -p 8081:8081 \
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
 
-      - name: Verify Welcome API
+      - name: Verify
         run: |
-          for i in {1..12}; do
-            RESPONSE=$(curl -s http://localhost:8081/api/welcome)
+           for i in {1..12}; do
+             RESPONSE=$(curl -s http://localhost:8081/api/welcome || true)
 
-            if [ ! -z "$RESPONSE" ]; then
-              echo "✅ Application Started Successfully"
-              echo "✅ Response: $RESPONSE"
-              exit 0
-            fi
+             if [ -n "$RESPONSE" ]; then
+               echo "Application Started Successfully"
+               echo "Response: $RESPONSE"
+               exit 0
+             fi
 
-            echo "⏳ Waiting for application..."
-            sleep 5
-          done
+             echo "Waiting for application..."
+             sleep 5
+           done
 
-          echo "❌ Application failed to start"
-          docker logs spring-boot-app
-          exit 1
-
-      - name: Show Container Logs
-        if: always()
-        run: |
-          docker logs spring-boot-app
+           echo "Application failed to start"
+           docker ps -a
+           docker logs spring-boot-app
+           exit 1
 
 #      - name: Deploy to Ec2
 #        uses: appleboy/ssh-action@v1.2.0

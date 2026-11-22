@@ -32,9 +32,6 @@ flowchart TD
 
     M --> N["Spring Boot Application Running on EC2"]
     N --> O["Access /api/welcome Endpoint"]
-
-    style CI fill:#dbeafe,stroke:#2563eb,color:#111827
-    style CD fill:#dcfce7,stroke:#16a34a,color:#111827
 ```
 
 

@@ -14,39 +14,52 @@ The pipeline automatically builds the application, creates a Docker image, pushe
 
 ---
 
-## Architecture
+## CI/CD Architecture
 
 ```mermaid
-flowchart LR
+flowchart TD
 
-    A[Developer] -->|Git Push| B[GitHub Repository]
+    A[Developer]
+    B[GitHub Repository]
+    C[GitHub Actions]
 
-    B -->|Trigger Workflow| C[GitHub Actions]
+    A -->|Git Push| B
+    B -->|Trigger Workflow| C
 
-    subgraph Continuous Integration
-        C --> D[Checkout Code]
-        D --> E[Setup Java 17]
-        E --> F[Maven Build]
-        F --> G[Create JAR]
-        G --> H[Build Docker Image]
-        H --> I[Push to Docker Hub]
+    subgraph CI["Continuous Integration"]
+        D[Checkout Source Code]
+        E[Setup Java 17]
+        F[Maven Build]
+        G[Generate JAR File]
+        H[Build Docker Image]
+        I[Push Image to Docker Hub]
+
+        D --> E --> F --> G --> H --> I
     end
 
-    I --> J[(Docker Hub)]
+    C --> D
 
-    subgraph Continuous Deployment
-        J --> K[SSH to AWS EC2]
-        K --> L[Pull Latest Image]
-        L --> M[Stop Existing Container]
-        M --> N[Remove Old Container]
-        N --> O[Run New Container]
+    J[(Docker Hub)]
+    I --> J
+
+    subgraph CD["Continuous Deployment"]
+        K[SSH into AWS EC2]
+        L[Pull Latest Docker Image]
+        M[Stop Existing Container]
+        N[Remove Old Container]
+        O[Run New Container]
+
+        K --> L --> M --> N --> O
     end
 
-    O --> P[Spring Boot App]
-   P --> Q["GET /api/welcome"]
+    J --> K
+
+    P[Spring Boot Application Running]
+    Q["GET: /api/welcome"]
+
+    O --> P
+    P --> Q
 ```
-
----
 
 ## Tech Stack
 

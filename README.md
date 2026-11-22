@@ -43,7 +43,7 @@ flowchart LR
     end
 
     O --> P[Spring Boot App]
-    P --> Q[/api/welcome]
+   P --> Q["GET /api/welcome"]
 ```
 
 ---

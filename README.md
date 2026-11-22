@@ -1,62 +1,104 @@
+# Spring Boot CI/CD Pipeline using GitHub Actions, Docker & AWS EC2
+
+## Project Overview
+
+This project demonstrates an end-to-end CI/CD pipeline for a Spring Boot application using:
+
+- GitHub Actions
+- Maven
+- Docker
+- Docker Hub
+- AWS EC2
+
+The pipeline automatically builds the application, creates a Docker image, pushes it to Docker Hub, and deploys the latest version to an AWS EC2 instance.
+
+---
 
 ## Architecture
 
-This project implements an automated CI/CD pipeline using
-GitHub Actions, Docker, Docker Hub and AWS EC2.
-
-
-## CI/CD Architecture
-
 ```mermaid
-flowchart TD
+flowchart LR
 
     A[Developer] -->|Git Push| B[GitHub Repository]
 
     B -->|Trigger Workflow| C[GitHub Actions]
 
-    subgraph CI[Continuous Integration]
-        C --> D[Checkout Source Code]
+    subgraph Continuous Integration
+        C --> D[Checkout Code]
         D --> E[Setup Java 17]
         E --> F[Maven Build]
-        F --> G[Generate JAR File]
+        F --> G[Create JAR]
         G --> H[Build Docker Image]
-        H --> I[Push Image to Docker Hub]
+        H --> I[Push to Docker Hub]
     end
 
     I --> J[(Docker Hub)]
 
-    subgraph CD[Continuous Deployment]
-        J --> K[SSH into AWS EC2]
-        K --> L[Pull Latest Docker Image]
+    subgraph Continuous Deployment
+        J --> K[SSH to AWS EC2]
+        K --> L[Pull Latest Image]
         L --> M[Stop Existing Container]
         M --> N[Remove Old Container]
         N --> O[Run New Container]
     end
 
-    O --> P[Spring Boot Application Running]
-
-    P --> Q["GET /api/welcome"]
+    O --> P[Spring Boot App]
+    P --> Q[/api/welcome]
 ```
 
+---
 
+## Tech Stack
 
-## Project Overview
+- Spring Boot
+- Java 17
+- Maven
+- Docker
+- Docker Hub
+- GitHub Actions
+- AWS EC2
+- Linux
 
-This project demonstrates an end-to-end CI/CD pipeline for a Java Spring Boot application using GitHub Actions, Docker, Docker Hub and AWS EC2.
+---
 
-The application is automatically built and packaged into a JAR file. GitHub Actions then builds a Docker image and pushes it to Docker Hub.
+## CI/CD Workflow
 
-Using SSH, GitHub Actions connects to the AWS EC2 instance, pulls the latest Docker image, replaces the existing container and starts the updated application.
+1. Developer pushes code to GitHub.
+2. GitHub Actions workflow is triggered.
+3. Maven builds the Spring Boot application.
+4. Docker image is created.
+5. Docker image is pushed to Docker Hub.
+6. GitHub Actions connects to AWS EC2 via SSH.
+7. EC2 pulls the latest Docker image.
+8. Existing container is stopped and removed.
+9. New container is launched.
+10. Application becomes available through `/api/welcome`.
 
-**Key features:**
-- Automated application build using Maven.
-- Docker image creation and publishing.
-- GitHub Actions workflow triggered by code pushes.
-- Secure SSH-based deployment to AWS EC2.
-- Containerized Spring Boot application.
+---
 
-**Application endpoint:**
+## Application Endpoint
 
-`http://<EC2-PUBLIC-IP>:8080/api/welcome`
+```http
+GET /api/welcome
+```
 
-Replace the placeholder with your EC2 public IP.
+Sample Response:
+
+```json
+Welcome to Spring Boot CI/CD Pipeline
+```
+
+---
+
+## Repository Structure
+
+```
+.
+├── src/
+├── Dockerfile
+├── pom.xml
+├── .github
+│   └── workflows
+│       └── deploy.yml
+└── README.md
+```

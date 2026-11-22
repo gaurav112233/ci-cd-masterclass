@@ -5,8 +5,6 @@ This project implements an automated CI/CD pipeline using
 GitHub Actions, Docker, Docker Hub and AWS EC2.
 
 
-```mermaid
-
 ## CI/CD Architecture
 
 ```mermaid

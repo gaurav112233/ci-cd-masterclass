@@ -6,12 +6,15 @@ GitHub Actions, Docker, Docker Hub and AWS EC2.
 
 
 ```mermaid
+
+## CI/CD Architecture
+
+```mermaid
 flowchart TD
     A["Developer"] -->|"Git Push"| B["GitHub Repository"]
+    B -->|"Push Trigger"| C["GitHub Actions"]
 
-  B -->|"Push Trigger"| C["GitHub Actions"]
-
-  subgraph CI["Continuous Integration - GitHub Actions Runner"]
+    subgraph CI["Continuous Integration - GitHub Actions Runner"]
         C --> D["Checkout Source Code"]
         D --> E["Setup Java"]
         E --> F["Build Spring Boot Application"]
@@ -20,21 +23,19 @@ flowchart TD
         H --> I["Push Docker Image to Docker Hub"]
     end
 
-   subgraph CD["Continuous Deployment"]
+    subgraph CD["Continuous Deployment"]
         I --> J["SSH Connection to AWS EC2"]
         J --> K["Pull Latest Docker Image"]
         K --> L["Stop and Remove Old Container"]
         L --> M["Run New Docker Container"]
     end
 
-   M --> N["Spring Boot Application Running on EC2"]
-   N --> O["Access /api/welcome Endpoint"]
+    M --> N["Spring Boot Application Running on EC2"]
+    N --> O["Access /api/welcome Endpoint"]
 
-  style CI fill:#dbeafe,stroke:#2563eb,color:#111827
-  style CD fill:#dcfce7,stroke:#16a34a,color:#111827
-…
-
-
+    style CI fill:#dbeafe,stroke:#2563eb,color:#111827
+    style CD fill:#dcfce7,stroke:#16a34a,color:#111827
+```
 
 
 

@@ -38,49 +38,49 @@ jobs:
       - name: Push image to Dockerhub
         run: docker push ${{ secrets.DOCKERHUB_USERNAME}}/${{env.IMAGE_NAME}}:latest
 
-      - name: Run Docker Container
-        run: |
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+#      - name: Run Docker Container
+#        run: |
+#          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+#
+#          docker run -d \
+#            --name spring-boot-app \
+#            -p 8081:8081 \
+#            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+#
+#      - name: Debug Container
+#        run: |
+#         docker ps -a
+#         docker logs spring-boot-app
+#
+#      - name: Verify
+#        run: |
+#           for i in {1..12}; do
+#             RESPONSE=$(curl -s http://localhost:8081/api/welcome || true)
+#
+#             if [ -n "$RESPONSE" ]; then
+#               echo "Application Started Successfully"
+#               echo "Response: $RESPONSE"
+#               exit 0
+#             fi
+#
+#             echo "Waiting for application..."
+#             sleep 5
+#           done
+#
+#           echo "Application failed to start"
+#           docker ps -a
+#           docker logs spring-boot-app
+#           exit 1
 
-          docker run -d \
-            --name spring-boot-app \
-            -p 8081:8081 \
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-
-      - name: Debug Container
-        run: |
-         docker ps -a
-         docker logs spring-boot-app
-
-      - name: Verify
-        run: |
-           for i in {1..12}; do
-             RESPONSE=$(curl -s http://localhost:8081/api/welcome || true)
-
-             if [ -n "$RESPONSE" ]; then
-               echo "Application Started Successfully"
-               echo "Response: $RESPONSE"
-               exit 0
-             fi
-
-             echo "Waiting for application..."
-             sleep 5
-           done
-
-           echo "Application failed to start"
-           docker ps -a
-           docker logs spring-boot-app
-           exit 1
-
-#      - name: Deploy to Ec2
-#        uses: appleboy/ssh-action@v1.2.0
-#        with:
-#          host: ${{secrets.EC2_HOST}}
-#          username: ${{ secrets.EC2_USER}}
-#          key: ${{secrets:EC2_SSH_kEY}}
-#          script: |
-#            docker pull ${{ secrets:DOCKER_USERNAME}}/${{env.IMAGE_NAME}}:latest
-#            docker stop spring-boot-app || true
-#            docker rm spring-boot-app || true
-#            docker run -d --name spring-boot-app --restart unless-stopped -p 8081:8081 ${{ secrets:DOCKER_USERNAME}}/${{env.IMAGE_NAME}}:latest
-#            docker image prune -f   # xyz
+      - name: Deploy to Ec2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{secrets.EC2_HOST}}
+          username: ${{ secrets.EC2_USER}}
+          key: ${{secrets.EC2_SSH_KEY}}
+          script: |
+            docker pull ${{ secrets:DOCKER_USERNAME}}/${{env.IMAGE_NAME}}:latest
+            docker stop spring-boot-app || true
+            docker rm spring-boot-app || true
+            docker run -d --name spring-boot-app --restart unless-stopped -p 8081:8081 ${{ secrets:DOCKER_USERNAME}}/${{env.IMAGE_NAME}}:latest
+            docker image prune -f   

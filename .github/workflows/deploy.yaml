@@ -71,6 +71,7 @@ jobs:
 #           docker ps -a
 #           docker logs spring-boot-app
 #           exit 1
+# nothing to commit
 
       - name: Deploy to Ec2
         uses: appleboy/ssh-action@v1.2.0
